@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block javascript %}
+function set_user_cookie() {
+    document.cookie = tduser + '=' + $('#username').val();
+}
+
+function stage_2() {
+    $('#username').hide();
+
+    // Show some buttons.
+    $('#create').show();
+    $('#join').show();
+
+    // Set the username title.
+    $('#usertitle').text(get_cookie(tduser));
+}
+
+$(function() {
+    $('#username').keypress(function(e) {
+        if (e.which == 13) {
+            set_user_cookie();
+            stage_2();
+            return false;
+        }
+    });
+
+    $('#join').on('click', function() {
+        $('#joinbox').show();
+    });
+
+    if (document.cookie !== '') {
+        stage_2();
+    }
+});
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="twelve columns">
+        <h1 style="text-align: center; margin-top: 20%;">Thrones Draft</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="four columns">&nbsp;</div>
+    <div class="four columns">
+        <h6><u id="usertitle"><strong>...</strong></u>&nbsp;has entered the game of thrones</h6>
+        <input type="text" class="u-full-width" id="username" placeholder="Set a username">
+        <a href="/create" id="create" style="display: none;" class="u-full-width button">Create</a>
+        <a href="#" id="join" style="display: none;" class="u-full-width button">Join</a>
+        <input type="text" class="u-full-width" id="joinbox" style="display: none;" placeholder="/room/<uuid>/<name>">
+    </div>
+    <div class="four columns">&nbsp;</div>
+</div>
+{% endblock %}

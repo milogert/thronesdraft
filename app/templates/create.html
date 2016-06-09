@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+{% block content %}
+<script>
+function setPacksLeft() {
+    var val = parseInt($('#playerNumber').val());
+    $("#packsLeft").val(Math.ceil((val - 2) / 2));
+}
+
+function setCardsNeeded() {
+    var players = parseInt($('#playerNumber').val());
+    var rounds = parseInt($('#roundNumber').val());
+    $("#cardsNeeded").val(players * rounds);
+}
+
+$(function() {
+    $("#playerNumber").on("input", function(e) {
+        setPacksLeft();
+    });
+
+    $("#playerNumber").on("input", function(e) {
+        setCardsNeeded();
+    });
+    
+    $("#roundNumber").on("input", function(e) {
+        setCardsNeeded();
+    });
+
+    setPacksLeft();
+    setCardsNeeded();
+});
+</script>
+
+<div class="row">
+    <div class="twelve columns">
+        <h1>Create a room</h1>
+        <p>Pick your packs on the right. Click submit on the bottom.</p>
+    </div>
+
+    <form method="POST">
+        <div class="four columns">
+            <label for="roomName">Room name</label>
+            <input type="text" class="u-full-width" placeholder="Room Name" id="roomName" name="roomName">
+
+            <label for="playerNumber">Number of players</label>
+            <input type="number" class="u-full-width" id="playerNumber" name="playerNumber" value="8">
+
+            <label for="roundNumber">Number of picks per player&nbsp;<a href="#roundsNote">*</a></label>
+            <input type="number" class="u-full-width" id="roundNumber" name="roundNumber" value="30">
+
+            <label for="cardsNeeded">Unique cards needed</label>
+            <input type="number" class="u-full-width" id="cardsNeeded" disabled>
+
+            <label for="packsLeft">Packs left</label>
+            <input type="number" class="u-full-width" id="packsLeft" disabled>
+
+        </div>
+
+        <div class="four columns">
+            <label for="packs">Pack list</label>
+            <select class="u-full-width" id="packs" name="packs" multiple style="height: 350px">
+                {% for pack in packs %}
+                    <option class="label-body" value="{{ pack.code }}" {% if pack.name == "Core Set" %}selected{% endif %}>
+                        {{ pack.cycle_position }}.{{ pack.position }}. {{ pack.name }} ({{ pack.total }} cards)
+                    </option>
+                    {% if not loop.last and pack.cycle_position != packs[loop.index0 + 1].cycle_position %}
+                        <option disabled value>---</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="four columns">
+            <label for="startingPool">Starting pool&nbsp;<a href="#poolNote">**</a></label>
+            <textarea id="startingPool" name="startingPool" class="u-full-width" style="height: 350px;">Roseroad
+Kingsroad
+Varys
+Wild Fire
+Wild Fire</textarea>
+        </div>
+
+        <div class="twelve columns">
+            <input class="button-primary u-full-width" type="submit" value="Create room">
+
+            <small>
+                <h5>Notes</h5>
+                <p id="roundsNote">*&nbsp;This is based on the face that, per pick, everyone will get around 2.8 draw deck (characters, attachments, locations, and events) cards and .2 plot deck cards. For instance, over the course of 30 rounds, if everybody gets 2.8 cards in their draw deck per round you end up with 84 cards in your draw deck. At .2 plots per round for 30 rounds, you have 6 plots.</p>
+
+                <hr>
+                
+                <p id="poolNote">**&nbsp;<strong>Protip:</strong> There are several formats for how to enter cards here. They are detailed below.
+                    <ul>
+                        <li><code>&lt;CardName&gt;</code> - Use this if there is only one card that is so named.</li>
+                        <li><code>&lt;CardName&gt; (&lt;SetCode&gt;)</code> - Use this if there are multiple cards that have the name <code>&lt;CardName&gt;</code>. Use the <a href="//thronesdb.com">Thrones DB</a> set code to specify <code>&lt;SetCode&gt;</code>.</li>
+                        <li><code>&lt;CardCode&gt;</code> - Using the <a href="//thronesdb.com">Thrones DB</a> card code, you can specify exactly what card you want for <code>&lt;CardCode&gt;</code>.</li>
+                    </ul>
+                </p>
+            </small>
+        </div>
+    </form>
+{% endblock %}
+

@@ -1,0 +1,31 @@
+<html>
+<head>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.7/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        var tduser = 'thronesdraftuser';
+
+        function get_cookie(cookiename) {
+            var c = document.cookie;
+            var split = c.split('; ');
+            var val = '';
+            for (var i = 0; i < split.length; i++) {
+                var s = split[i].split('=');
+                if (s[0] === cookiename) {
+                    val = s[1];
+                    break;
+                }
+            }
+            return val;
+        }
+        {% block javascript %}{% endblock %}
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="//cdn.milogert.com/css/all.min.css">
+    {% block css %}{% endblock %}
+</head>
+<body>
+    <div class="container">{% block content%}{% endblock %}</div>
+    {% block rawbody %}{% endblock %}
+</body>
+</html>

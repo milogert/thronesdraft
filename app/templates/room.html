@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+{% block javascript %}
+function addChat(text) {
+    $('#messages').append('<p>' + text + '</p>');
+}
+
+$(function() {
+    // Create a socket.
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', function() {
+        socket.emit('join', { "room": "{{ room }}" });
+    });
+
+    socket.on('chatresponse', function(text) {
+        addChat(text);
+        console.log(text);
+    });
+
+    var sendMessage = function() {
+        socket.emit('chat', {
+            room: "{{ room }}",
+            user: get_cookie(tduser),
+            text: $("#chatbox").val()
+        });
+    };
+
+    $('.cardImage').on('click', function(e) {
+        socket.emit('cardPicked', {
+            room: '{{ room }}',
+            user: get_cookie(tduser),
+            code: $(e.currentTarget).data('code')
+        });
+    });
+
+    socket.on('cardSaved', function(data) {
+        $('#draftList').append(data['name'] + ' (' + data['code'] + ')<br>');
+        
+    });
+
+    socket.on('cardRemoved', function(data) {
+        $('[data-code=' + data['code'] + ']').remove();
+        addChat(data['text']);
+    });
+
+    $('#send').on('click', sendMessage);
+
+    $('#cardFilter').on('input', function(e) {
+        var filter = $(e.currentTarget).val();
+
+        $('.cardImage').not('[data-filter*="' + filter + '"]').each(function(e1, ele) {
+            $(ele).hide();
+        });
+        $('.cardImage[data-filter*="' + filter + '"]').each(function(e1, ele) {
+            $(ele).show();
+        });
+        if (filter === '') {
+            $('.cardImage').each(function(e1, ele) {
+                $(ele).show();
+            });
+        }
+    });
+
+    $('.cardImage').on('mouseover', function(e) {
+        $('#cardzoom')
+            .html($(e.currentTarget).clone().css('width', 'auto').css('height', 'auto').css('margin', 'auto').css('display', 'block'))
+            .show()
+        ;
+    });
+
+    $('.cardImage').on('mouseleave', function(e) {
+        $('#cardzoom')
+            .empty()
+            .hide()
+        ;
+    });
+});
+{% endblock %}
+
+{% block css %}
+<style>
+#chat {
+    position: fixed;
+    right: 20px;
+    bottom: 0px;
+    width: 20%;
+    padding: 5px;
+}
+
+#cardzoom {
+    display: none;
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    width: 419px;
+    height: 419px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="twelve columns">
+        <h1>{{ room }}</h1>
+    </div>
+
+    <div class="twelve columns">
+        <p>permalink: <a href="/room/{{ uuid }}/{{ room }}">/room/{{ uuid }}/{{ room }}</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="eight columns">
+        <input type="text" id="cardFilter" class="u-full-width" placeholder="Filter here...">
+        {% for card in cards %}
+            <img src="http://thronesdb.com/{{ card.imagesrc }}" class="u-full-width cardImage" style="width: 19%;" data-code="{{ card.code }}" data-filter="{{ card.name.lower() }} {{ card.name }}">
+        {% endfor %}
+    </div>
+
+    <div class="four columns">
+        <h2>Draft list</h2>
+        <div id="draftList">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block rawbody %}
+<div id="cardzoom"></div>
+
+<div id="chat">
+    <div id="messages"></div>
+    <input class="u-full-width" type="text" id="chatbox">
+    <input class="u-full-width" type="button" id="send" value="send">
+</div>
+{% endblock %}

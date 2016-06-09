@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+
+{% block javascript %}
+$(function() {
+    // Create a socket.
+    var socket = io.connect();//'http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', function() {
+        var player = get_cookie(tduser);
+        socket.emit('staging-connect', {
+            'user': player,
+            'room': '{{ room.uuid }}-staging',
+            'uuid': '{{ room.uuid }}'
+        });
+    });
+
+    socket.on('staging-userjoined', function(data) {
+        $('#players').append('<p>' + data['user'] + '</p>');
+        $('#joined').text(parseInt($('#joined').text()) + 1);
+        console.log(data['text']);
+    });
+
+    $('#start').on('click', function() {
+        socket.emit('staging-signaldraft', { 'room': '{{ room.uuid}}-staging' });
+    });
+
+    socket.on('staging-startdraft', function(data) {
+        window.location = '/room/{{ room.uuid }}/{{ room.name }}';
+    });
+});
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="twelve columns">
+        <h1>Staging for {{ room.name }}</h1>
+        <input type="button" id="start" class="u-full-width" value="Start draft">
+        <p><span id="joined">0</span> of {{ room.players }} players joined.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="six columns">
+        <div id="players"></div>
+    </div>
+
+    <div class="six columns">
+        <div id="chat"></div>
+    </div>
+</div>
+{% endblock %}

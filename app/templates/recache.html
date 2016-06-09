@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+{% for cat, oldnew in data.iteritems() %}
+    <div class="row">
+        <div class="twelve columns">
+            <h1>{{ cat }}</h1>
+        </div>
+    </div>
+        
+    <div class="row">
+        <div class="six columns">
+            <p>{{ oldnew['old'] }}</p>
+        </div>
+        
+        <div class="six columns">
+            <p>{{ oldnew['new'] }}</p>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}
